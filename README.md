@@ -329,6 +329,12 @@ This method can be used to provide a custom transform for each carousel view. Th
 
 This method is used to customise the parameters of the standard carousel types. By implementing this method, you can tweak options such as the number of items displayed in a circular carousel, or the amount of tilt in a coverflow carousel, as well as whether the carousel should wrap and if it should fade out at the ends, etc. For any option you are not interested in tweaking, just return the default value. The meaning of these options is listed below under *iCarouselOption values*. Check the *Options Demo* for an advanced example of using this method.
 
+	- (void)carousel:(iCarousel *)carousel willSelectItemAtIndex:(NSInteger)index;
+
+This method will fire before the user taps any carousel item view (not including placeholder views), including the currently selected view. This method will not fire if the user taps a control within the currently selected view (i.e. any view that is a subclass of UIControl).
+
+**Remark: This method was previously called -carousel:didSelectItemAtIndex:. The -carousel:didSelectItemAtIndex: method is now called after selection**
+
 	- (void)carousel:(iCarousel *)carousel didSelectItemAtIndex:(NSInteger)index;
 
 This method will fire if the user taps any carousel item view (not including placeholder views), including the currently selected view. This method will not fire if the user taps a control within the currently selected view (i.e. any view that is a subclass of UIControl).
