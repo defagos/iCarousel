@@ -137,18 +137,25 @@
     return YES;
 }
 
-- (void)carousel:(iCarousel *)_carousel didSelectItemAtIndex:(NSInteger)index
+- (void)carousel:(iCarousel *)_carousel willSelectItemAtIndex:(NSInteger)index
 {
 	if (index == carousel.currentItemIndex)
 	{
 		//note, this will only ever happen if useButtons == NO
 		//otherwise the button intercepts the tap event
-		NSLog(@"Did select current item");
+		NSLog(@"Will select current item");
 	}
 	else
 	{
-		NSLog(@"Did select item number %i", index);
+		NSLog(@"Will select item number %i", index);
 	}
+}
+
+- (void)carousel:(iCarousel *)_carousel didSelectItemAtIndex:(NSInteger)index
+{
+    //note, this will only ever happen if useButtons == NO
+    //otherwise the button intercepts the tap event
+    NSLog(@"Did select item number %i", index);
 }
 
 #pragma mark -

@@ -1841,6 +1841,12 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
                 [_delegate carouselDidEndScrollingAnimation:self];
                 [self disableAnimation];
             }
+            if ([_delegate respondsToSelector:@selector(carousel:didSelectItemAtIndex:)])
+            {
+                [self enableAnimation];
+                [_delegate carousel:self didSelectItemAtIndex:self.currentItemIndex];
+                [self disableAnimation];
+            }
         }
     }
     else if (_decelerating)
@@ -2094,13 +2100,13 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 - (void)didTap:(UITapGestureRecognizer *)tapGesture
 {
     NSInteger index = [self indexOfItemView:[tapGesture.view.subviews lastObject]];
+    if ([_delegate respondsToSelector:@selector(carousel:willSelectItemAtIndex:)])
+    {
+        [_delegate carousel:self willSelectItemAtIndex:index];
+    }
     if (_centerItemWhenSelected && index != self.currentItemIndex)
     {
         [self scrollToItemAtIndex:index animated:YES];
-    }
-    if ([_delegate respondsToSelector:@selector(carousel:didSelectItemAtIndex:)])
-    {
-        [_delegate carousel:self didSelectItemAtIndex:index];
     }
 }
 
@@ -2249,10 +2255,10 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
                 if (![_delegate respondsToSelector:@selector(carousel:shouldSelectItemAtIndex:)] ||
                     [_delegate carousel:self shouldSelectItemAtIndex:index])
                 {
-                    if ([_delegate respondsToSelector:@selector(carousel:didSelectItemAtIndex:)])
+                    if ([_delegate respondsToSelector:@selector(carousel:willSelectItemAtIndex:)])
                     {
                         [self enableAnimation];
-                        [_delegate carousel:self didSelectItemAtIndex:index];
+                        [_delegate carousel:self willSelectItemAtIndex:index];
                         [self disableAnimation];
                     }
                 }
