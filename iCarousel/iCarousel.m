@@ -2045,24 +2045,19 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     {
         //handle tap
         NSInteger index = [self viewOrSuperviewIndex:touch.view];
-        if (index == NSNotFound && _centerItemWhenSelected)
-        {
-            //view is a container view
-            index = [self viewOrSuperviewIndex:[touch.view.subviews lastObject]];
-        }
-        if (index != NSNotFound)
-        {
-            if ([_delegate respondsToSelector:@selector(carousel:shouldSelectItemAtIndex:)])
+        if (_centerItemWhenSelected) {
+            if (index == NSNotFound)
             {
-                if (![_delegate carousel:self shouldSelectItemAtIndex:index])
+                //view is a container view
+                index = [self viewOrSuperviewIndex:[touch.view.subviews lastObject]];
+            }
+            else
+            {
+                if ([self viewOrSuperview:touch.view isKindOfClass:[UIControl class]] ||
+                    [self viewOrSuperview:touch.view isKindOfClass:[UITableViewCell class]])
                 {
                     return NO;
                 }
-            }
-            if ([self viewOrSuperview:touch.view isKindOfClass:[UIControl class]] ||
-                [self viewOrSuperview:touch.view isKindOfClass:[UITableViewCell class]])
-            {
-                return NO;
             }
         }
     }
@@ -2102,9 +2097,15 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 
 - (void)didTap:(UITapGestureRecognizer *)tapGesture
 {
+    NSInteger index = [self indexOfItemView:[tapGesture.view.subviews lastObject]];
+    if ([_delegate respondsToSelector:@selector(carousel:shouldSelectItemAtIndex:)] &&
+        ![_delegate carousel:self shouldSelectItemAtIndex:index])
+    {
+        return;
+    }
+        
     _previousItemIndex = _previousCurrentItemIndex;
     
-    NSInteger index = [self indexOfItemView:[tapGesture.view.subviews lastObject]];
     if ([_delegate respondsToSelector:@selector(carousel:willSelectItemAtIndex:)])
     {
         [_delegate carousel:self willSelectItemAtIndex:index];

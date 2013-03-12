@@ -126,7 +126,7 @@
 
 - (BOOL)carousel:(iCarousel *)_carousel shouldSelectItemAtIndex:(NSInteger)index
 {
-	if (index == carousel.currentItemIndex)
+	if (index == carousel.previousItemIndex)
 	{
 		NSLog(@"Should select current item");
 	}
@@ -139,7 +139,7 @@
 
 - (void)carousel:(iCarousel *)_carousel willSelectItemAtIndex:(NSInteger)index
 {
-	if (index == carousel.currentItemIndex)
+	if (index == carousel.previousItemIndex)
 	{
 		//note, this will only ever happen if useButtons == NO
 		//otherwise the button intercepts the tap event
