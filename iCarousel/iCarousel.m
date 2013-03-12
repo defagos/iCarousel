@@ -1842,8 +1842,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
                 [_delegate carouselDidEndScrollingAnimation:self];
                 [self disableAnimation];
             }
-            if ([_delegate respondsToSelector:@selector(carousel:didSelectItemAtIndex:)])
-            {
+            if (self.currentItemIndex != -1 && [_delegate respondsToSelector:@selector(carousel:didSelectItemAtIndex:)]) {
                 [self enableAnimation];
                 [_delegate carousel:self didSelectItemAtIndex:self.currentItemIndex];
                 [self disableAnimation];
