@@ -153,9 +153,16 @@
 
 - (void)carousel:(iCarousel *)_carousel didSelectItemAtIndex:(NSInteger)index
 {
-    //note, this will only ever happen if useButtons == NO
-    //otherwise the button intercepts the tap event
-    NSLog(@"Did select item number %i", index);
+    if (index == carousel.previousItemIndex)
+	{
+        //note, this will only ever happen if useButtons == NO
+		//otherwise the button intercepts the tap event
+		NSLog(@"Did select current item");        
+	}
+	else
+	{
+        NSLog(@"Did select item number %i", index);
+	}
 }
 
 #pragma mark -

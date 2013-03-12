@@ -84,6 +84,7 @@
 @property (nonatomic, strong) NSMutableSet *itemViewPool;
 @property (nonatomic, strong) NSMutableSet *placeholderViewPool;
 @property (nonatomic, assign) NSInteger previousItemIndex;
+@property (nonatomic, assign) NSInteger previousCurrentItemIndex;
 @property (nonatomic, assign) NSInteger numberOfPlaceholdersToShow;
 @property (nonatomic, assign) NSInteger numberOfVisibleItems;
 @property (nonatomic, assign) CGFloat itemWidth;
@@ -122,7 +123,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 @synthesize itemViews = _itemViews;
 @synthesize itemViewPool = _itemViewPool;
 @synthesize placeholderViewPool = _placeholderViewPool;
-@synthesize previousItemIndex = _previousItemIndex;
+@synthesize previousCurrentItemIndex = _previousCurrentItemIndex;
 @synthesize itemWidth = _itemWidth;
 @synthesize scrollOffset = _scrollOffset;
 @synthesize offsetMultiplier = _offsetMultiplier;
@@ -308,7 +309,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
         [self disableAnimation];
         _scrollOffset = [self clampedOffset:scrollOffset];
         [self didScroll];
-        _previousItemIndex = self.currentItemIndex;
+        _previousCurrentItemIndex = self.currentItemIndex;
         [self depthSortViews];
         [self enableAnimation];
     }
@@ -1162,7 +1163,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     [self updateNumberOfVisibleItems];
     
     //prevent false index changed event
-    _previousItemIndex = self.currentItemIndex;
+    _previousCurrentItemIndex = self.currentItemIndex;
     
     //update offset multiplier
     switch (_type)
@@ -1497,7 +1498,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
         _startTime = CACurrentMediaTime();
         _startOffset = _scrollOffset;
         _scrollDuration = duration;
-        _previousItemIndex = roundf(_scrollOffset);
+        _previousCurrentItemIndex = roundf(_scrollOffset);
         _endOffset = _startOffset + offset;
         if (!_wrapEnabled)
         {
@@ -1541,7 +1542,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     }
     else
     {
-        self.scrollOffset = [self clampedIndex:_previousItemIndex + itemCount];
+        self.scrollOffset = [self clampedIndex:_previousCurrentItemIndex + itemCount];
     }
 }
 
@@ -1847,6 +1848,8 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
                 [_delegate carousel:self didSelectItemAtIndex:self.currentItemIndex];
                 [self disableAnimation];
             }
+            
+            _previousItemIndex = self.currentItemIndex;
         }
     }
     else if (_decelerating)
@@ -1946,7 +1949,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     
     //check if index has changed
     NSInteger currentIndex = roundf(_scrollOffset);
-    NSInteger difference = [self minScrollDistanceFromIndex:_previousItemIndex toIndex:currentIndex];
+    NSInteger difference = [self minScrollDistanceFromIndex:_previousCurrentItemIndex toIndex:currentIndex];
     if (difference)
     {
         _toggleTime = CACurrentMediaTime();
@@ -1976,7 +1979,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     }
     
     //notify delegate of change index
-    if ([self clampedIndex:_previousItemIndex] != self.currentItemIndex &&
+    if ([self clampedIndex:_previousCurrentItemIndex] != self.currentItemIndex &&
         [_delegate respondsToSelector:@selector(carouselCurrentItemIndexDidChange:)])
     {
         [self enableAnimation];
@@ -1985,7 +1988,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     }
     
     //DEPRECATED
-    if ([self clampedIndex:_previousItemIndex] != self.currentItemIndex &&
+    if ([self clampedIndex:_previousCurrentItemIndex] != self.currentItemIndex &&
         [_delegate respondsToSelector:@selector(carouselCurrentItemIndexUpdated:)])
     {
         
@@ -1999,7 +2002,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     }
     
     //update previous index
-    _previousItemIndex = currentIndex;
+    _previousCurrentItemIndex = currentIndex;
 } 
 
 
@@ -2099,6 +2102,8 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 
 - (void)didTap:(UITapGestureRecognizer *)tapGesture
 {
+    _previousItemIndex = _previousCurrentItemIndex;
+    
     NSInteger index = [self indexOfItemView:[tapGesture.view.subviews lastObject]];
     if ([_delegate respondsToSelector:@selector(carousel:willSelectItemAtIndex:)])
     {
@@ -2107,6 +2112,10 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     if (_centerItemWhenSelected && index != self.currentItemIndex)
     {
         [self scrollToItemAtIndex:index animated:YES];
+    }
+    else if ([_delegate respondsToSelector:@selector(carousel:didSelectItemAtIndex:)])
+    {
+        [_delegate carousel:self didSelectItemAtIndex:index];
     }
 }
 
@@ -2146,6 +2155,10 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
                 }
                 if (!_decelerating && (_scrollToItemBoundary || (_scrollOffset - [self clampedOffset:_scrollOffset]) != 0.0f))
                 {
+                    if ([_delegate respondsToSelector:@selector(carousel:willSelectItemAtIndex:)]) {
+                        [_delegate carousel:self willSelectItemAtIndex:self.currentItemIndex];
+                    }
+                    
                     if (fabsf(_scrollOffset - self.currentItemIndex) < 0.01f)
                     {
                         //call scroll to trigger events for legacy support reasons
